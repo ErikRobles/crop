@@ -90,7 +90,6 @@ $('.upload-result').on('click', function (ev) {
 
 </script>
 <?php 
-
 $cropped_image = $_POST['image'];
 list($type, $cropped_image) = explode(';', $cropped_image);
 list(, $cropped_image) = explode(',', $cropped_image);
