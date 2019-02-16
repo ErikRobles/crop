@@ -1,9 +1,8 @@
 <html lang="en">
 <head>
-  <title>PHP - jquery ajax crop image before upload using croppie plugins</title>
+  <title>PHP - AJAX crop Image</title>
   <script src="js/jquery.js"></script>
-
- 
+	<script src="js/bootstrap.min.js"></script>
   <script src="js/croppie.js"></script>
   <link rel="stylesheet" href="css/bootstrap.min.css">
   <link rel="stylesheet" href=" css/croppie.css">
@@ -12,93 +11,110 @@
 
 
 <div class="container">
-	<div class="panel panel-default">
-	  <div class="panel-heading">Image Upload</div>
-	  <div class="panel-body">
+          <br />
+      <h3 align="center">Image Crop</h3>
+      <br />
+      <br />
+   <div class="panel panel-default">
+      <div class="panel-heading">Select Profile Image</div>
+      <div class="panel-body" align="center">
+       <input type="file" name="insert_image" id="insert_image" accept="image/*" />
+       <br />
+       <div id="store_image"></div>
+      </div>
+     </div>
+    </div>
+    </body>  
+</html>
 
-
-	  	<div class="row">
-	  		<div class="col-md-4 text-center">
-				<div id="upload-demo" style="width:350px"></div>
-	  		</div>
-	  		<div class="col-md-4" style="padding-top:30px;">
-				<strong>Select Image:</strong>
-				<br/>
-				<input type="file" id="upload">
-				<br/>
-				<button class="btn btn-success upload-result">Upload Image</button>
-	  		</div>
-	  		<div class="col-md-4" style="">
-				<div id="upload-demo-i" style="background:#e1e1e1;width:300px;padding:30px;height:300px;margin-top:30px"></div>
-	  		</div>
-	  	</div>
-
-
-	  </div>
-	</div>
+<div id="insertimageModal" class="modal" role="dialog">
+ <div class="modal-dialog">
+  <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal">&times;</button>
+        <h4 class="modal-title">Crop & Insert Image</h4>
+      </div>
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-8 text-center">
+            <div id="image_demo" style="width:350px; margin-top:30px"></div>
+          </div>
+          <div class="col-md-4" style="padding-top:30px;">
+        <br />
+        <br />
+        <br/>
+            <button class="btn btn-success crop_image">Crop & Insert Image</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
 </div>
 
+<script>  
+$(document).ready(function(){
 
-<script type="text/javascript">
-$uploadCrop = $('#upload-demo').croppie({
+ $image_crop = $('#image_demo').croppie({
     enableExif: true,
     viewport: {
-        width: 200,
-        height: 200,
-        type: 'circle'
+      width:200,
+      height:200,
+      type:'square' //circle
     },
-    boundary: {
-        width: 300,
-        height: 300
-    }
-});
+    boundary:{
+      width:300,
+      height:300
+    }    
+  });
 
-
-$('#upload').on('change', function () { 
-	var reader = new FileReader();
-    reader.onload = function (e) {
-    	$uploadCrop.croppie('bind', {
-    		url: e.target.result
-    	}).then(function(){
-    		console.log('jQuery bind complete');
-    	});
-    	
+  $('#insert_image').on('change', function(){
+    var reader = new FileReader();
+    reader.onload = function (event) {
+      $image_crop.croppie('bind', {
+        url: event.target.result
+      }).then(function(){
+        console.log('jQuery bind complete');
+      });
     }
     reader.readAsDataURL(this.files[0]);
-});
+    $('#insertimageModal').modal('show');
+  });
 
+  $('.crop_image').click(function(event){
+    $image_crop.croppie('result', {
+      type: 'canvas',
+      size: 'viewport'
+    }).then(function(response){
+      $.ajax({
+        url:'insert.php',
+        type:'POST',
+        data:{"image":response},
+        success:function(data){
+          $('#insertimageModal').modal('hide');
+          load_images();
+          alert(data);
+        }
+      })
+    });
+  });
 
-$('.upload-result').on('click', function (ev) {
-	$uploadCrop.croppie('result', {
-		type: 'canvas',
-		size: 'viewport'
-	}).then(function (resp) {
+  load_images();
 
+  function load_images()
+  {
+    $.ajax({
+      url:"fetch_images.php",
+      success:function(data)
+      {
+        $('#store_image').html(data);
+      }
+    })
+  }
 
-		$.ajax({
-			url: "ajaxpro.php",
-			type: "POST",
-			data: {"image":resp},
-			success: function (data) {
-				html = '<img src="' + resp + '" />';
-				$("#upload-demo-i").html(html);
-			}
-		});
-	});
-});
-
-
+});  
 </script>
-<?php 
-$cropped_image = $_POST['image'];
-list($type, $cropped_image) = explode(';', $cropped_image);
-list(, $cropped_image) = explode(',', $cropped_image);
-$cropped_image = base64_decode($cropped_image);
-$image_name = date('ymdgis').'.png';
-file_put_contents('Uploads/'.$image_name, $cropped_image);
-// add insert/update query to save filename in the database table
-
-?>
-
 </body>
 </html>
