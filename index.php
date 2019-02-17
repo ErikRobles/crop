@@ -24,7 +24,7 @@
       </div>
      </div>
     </div>
-    </body>  
+    </body>
 </html>
 
 <div id="insertimageModal" class="modal" role="dialog">
@@ -54,7 +54,7 @@
   </div>
 </div>
 
-<script>  
+<script>
 $(document).ready(function(){
 
  $image_crop = $('#image_demo').croppie({
@@ -67,7 +67,7 @@ $(document).ready(function(){
     boundary:{
       width:300,
       height:300
-    }    
+    }
   });
 
   $('#insert_image').on('change', function(){
@@ -114,7 +114,7 @@ $(document).ready(function(){
     })
   }
 
-});  
+});
 </script>
 </body>
 </html>
